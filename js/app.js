@@ -395,13 +395,113 @@ function initBookingSimulator() {
       showToast('Booking success! Gate pass generated.', 'success');
     })
     .catch(err => {
-      console.error(err);
+      console.warn("Backend unavailable, generating ticket in Demo Mode (LocalStorage):", err);
+      
+      // Fallback: Generate mock booking ticket
+      const currentYear = new Date().getFullYear();
+      const randomNum = Math.floor(1000 + Math.random() * 9000);
+      const ticketId = `GH-${currentYear}-${randomNum}`;
+      
+      const mockData = {
+        id: Date.now(),
+        ticket_id: ticketId,
+        visitor_name: name,
+        email: email,
+        visit_date: dateInput.value,
+        package_name: packageName,
+        adults: finalBill.adultsCount,
+        children: finalBill.childrenCount,
+        addons: addonsList.join(', '),
+        total_price: finalBill.grandTotal
+      };
+      
+      // Save mock booking to LocalStorage
+      const localBookings = JSON.parse(localStorage.getItem('greenhaven_bookings') || '[]');
+      localBookings.push(mockData);
+      localStorage.setItem('greenhaven_bookings', JSON.stringify(localBookings));
+      
+      // Re-enable and reset form
       submitBtn.disabled = false;
       submitBtn.innerHTML = `
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         Confirm Booking & Generate Ticket
       `;
-      showToast('Error booking ticket. Try again later.', 'info');
+      form.reset();
+      addonItems.forEach(item => item.classList.remove('selected'));
+      calculateTotal();
+      
+      // Build dynamic receipt html
+      let receiptHtml = `
+        <div class="receipt-header">
+          <div class="receipt-logo">GREENHAVEN ECO-RETREAT</div>
+          <div>Booking Gate Pass Ticket</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Ticket ID: ${mockData.ticket_id} (Demo Mode)</div>
+        </div>
+        
+        <div class="receipt-row">
+          <span>Visitor Name:</span>
+          <strong>${mockData.visitor_name}</strong>
+        </div>
+        <div class="receipt-row">
+          <span>Email Address:</span>
+          <span>${mockData.email}</span>
+        </div>
+        <div class="receipt-row">
+          <span>Booking Date:</span>
+          <span>${mockData.visit_date}</span>
+        </div>
+        <div class="receipt-row">
+          <span>Package Choice:</span>
+          <span>${mockData.package_name}</span>
+        </div>
+        
+        <div class="receipt-divider"></div>
+        
+        <div class="receipt-row">
+          <span>Base package (${mockData.adults} Ad, ${mockData.children} Ch):</span>
+          <span>₹${finalBill.packageTotal.toFixed(2)}</span>
+        </div>
+      `;
+      
+      if (mockData.addons) {
+        receiptHtml += `
+          <div class="receipt-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+            <span>Add-ons Checked:</span>
+            <span style="font-size: 0.82rem; color: var(--text-muted); padding-left: 10px;">${mockData.addons}</span>
+          </div>
+          <div class="receipt-row">
+            <span>Add-ons Pricing total:</span>
+            <span>₹${finalBill.addonTotal.toFixed(2)}</span>
+          </div>
+        `;
+      }
+      
+      receiptHtml += `
+        <div class="receipt-row">
+          <span>Eco & service Tax (5%):</span>
+          <span>₹${finalBill.taxTotal.toFixed(2)}</span>
+        </div>
+        
+        <div class="receipt-divider"></div>
+        
+        <div class="receipt-row total">
+          <span>GRAND TOTAL:</span>
+          <span>₹${mockData.total_price.toFixed(2)}</span>
+        </div>
+        
+        <div class="receipt-barcode">
+          <div>SCANNABLE ENTRANCE TICKET</div>
+          <div class="barcode-sim"></div>
+          <div style="font-size: 0.7rem; margin-top: 5px;">Present this barcode at gate check-in</div>
+        </div>
+      `;
+      
+      receiptContainer.innerHTML = receiptHtml;
+      
+      // Toggle modal overlay
+      modalOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      showToast('Booking success! Gate pass generated (Demo Mode).', 'success');
     });
   });
   
@@ -555,11 +655,17 @@ function initReviewsCarousel() {
         renderReviews();
       })
       .catch(err => {
-        console.error("Error loading reviews:", err);
-        // Fallback reviews array in case backend server encounters issues
-        reviews = [
-          { name: "Sanjay Rao", title: "Family Visitor", rating: 5, text: "The trekking and the cottage package were absolutely incredible. The local food is cooked organically and reminds us of traditional home dishes." }
-        ];
+        console.warn("Backend unavailable, loading reviews from LocalStorage:", err);
+        // Fallback: Read reviews from local storage, or use defaults
+        const localReviews = JSON.parse(localStorage.getItem('greenhaven_reviews') || '[]');
+        if (localReviews.length > 0) {
+          reviews = localReviews;
+        } else {
+          reviews = [
+            { name: "Sanjay Rao", title: "Family Visitor", rating: 5, text: "The trekking and the cottage package were absolutely incredible. The local food is cooked organically and reminds us of traditional home dishes. Our kids loved the boating!" },
+            { name: "Anjali K.", title: "Solo Backpacker", rating: 4, text: "Great place for nature photographers and hikers. The guides are extremely knowledgeable about native fauna. Accommodation in the tents is very clean and standard." }
+          ];
+        }
         renderReviews();
       });
   }
@@ -604,10 +710,30 @@ function initReviewsCarousel() {
       showToast('Thank you! Review posted to SQL database.', 'success');
     })
     .catch(err => {
-      console.error(err);
+      console.warn("Backend unavailable, saving review to LocalStorage Demo Mode:", err);
+      // Fallback: Save review to LocalStorage
+      const mockSavedReview = {
+        id: Date.now(),
+        name: name,
+        title: "Verified Visitor (Demo Mode)",
+        rating: activeRating,
+        text: message
+      };
+      
+      const localReviews = JSON.parse(localStorage.getItem('greenhaven_reviews') || '[]');
+      localReviews.unshift(mockSavedReview);
+      localStorage.setItem('greenhaven_reviews', JSON.stringify(localReviews));
+      
       submitBtn.disabled = false;
       submitBtn.textContent = 'Submit Review';
-      showToast('Failed to save review to server.', 'info');
+      reviewForm.reset();
+      activeRating = 5;
+      updateStarUI(activeRating);
+      
+      reviews.unshift(mockSavedReview);
+      renderReviews();
+      
+      showToast('Review submitted in Demo Mode (Local Storage)!', 'success');
     });
   });
   
@@ -765,10 +891,21 @@ function initContactForm() {
       submitBtn.textContent = originalText;
     })
     .catch(err => {
-      console.error(err);
+      console.warn("Backend unavailable, saving contact message to LocalStorage:", err);
+      // Fallback: Log contact message to LocalStorage
+      const localContacts = JSON.parse(localStorage.getItem('greenhaven_contacts') || '[]');
+      localContacts.push({
+        name,
+        email,
+        message,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem('greenhaven_contacts', JSON.stringify(localContacts));
+      
+      showToast('Message logged in Demo Mode (Local Storage)!', 'success');
+      contactForm.reset();
       submitBtn.disabled = false;
       submitBtn.textContent = originalText;
-      showToast('Failed to deliver message to database.', 'info');
     });
   });
   
