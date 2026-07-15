@@ -208,6 +208,15 @@ function initBookingSimulator() {
   const btnDismiss = document.getElementById('btn-dismiss-receipt');
   const submitBtn = form.querySelector('button[type="submit"]');
   
+  // Element variables for AI Dynamic Pricing and Recommender
+  const aiPricingIndicator = document.getElementById('ai-pricing-indicator');
+  const aiPricingExplanation = document.getElementById('ai-pricing-explanation');
+  const aiPricingConfidence = document.getElementById('ai-pricing-confidence');
+  const aiPricingAdjustment = document.getElementById('ai-pricing-adjustment');
+  
+  const aiRecBox = document.getElementById('ai-recommendations-box');
+  const aiRecList = document.getElementById('ai-recommendations-list');
+
   // Set default check-in date
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -228,6 +237,7 @@ function initBookingSimulator() {
   packageSelect.addEventListener('change', calculateTotal);
   adultsInput.addEventListener('input', calculateTotal);
   childrenInput.addEventListener('input', calculateTotal);
+  dateInput.addEventListener('change', calculateTotal);
   
   function calculateTotal() {
     const packageCostPerGuest = parseFloat(packageSelect.value);
@@ -244,15 +254,59 @@ function initBookingSimulator() {
     }
     
     const subtotal = packageTotal + addonTotal;
-    const taxRate = 0.05;
-    const taxTotal = subtotal * taxRate;
-    const grandTotal = subtotal + taxTotal;
     
+    // ==========================================================
+    // AI Dynamic Pricing Regressor Simulator
+    // ==========================================================
+    let dynamicFactor = 0.0;
+    let explanationParts = [];
+    
+    if (dateInput.value) {
+      const selectedDate = new Date(dateInput.value);
+      const month = selectedDate.getMonth(); // 0 = Jan, 5 = June
+      const day = selectedDate.getDay();     // 0 = Sun, 5 = Fri, 6 = Sat
+      
+      // Indian seasonality dynamic factors
+      if (month >= 5 && month <= 8) { // Monsoon season (June - Sept)
+        dynamicFactor -= 0.15;
+        explanationParts.push("Monsoon Off-Peak Discount (-15%)");
+      } else if (month === 10 || month === 11 || month === 0) { // Winter peak (Nov, Dec, Jan)
+        dynamicFactor += 0.12;
+        explanationParts.push("Winter Peak Demand surcharge (+12%)");
+      } else {
+        explanationParts.push("Standard seasonal demand active");
+      }
+      
+      // Weekend demand surge factor (Friday, Saturday, Sunday)
+      if (day === 0 || day === 5 || day === 6) {
+        dynamicFactor += 0.05;
+        explanationParts.push("Weekend surcharge (+5%)");
+      }
+    }
+    
+    const finalSubtotal = subtotal * (1 + dynamicFactor);
+    const taxRate = 0.05;
+    const taxTotal = finalSubtotal * taxRate;
+    const grandTotal = finalSubtotal + taxTotal;
+    
+    // Update pricing AI indicator UI
+    const adjustmentPct = Math.round(dynamicFactor * 100);
+    const adjustmentSign = adjustmentPct >= 0 ? "+" : "";
+    aiPricingAdjustment.textContent = `${adjustmentSign}${adjustmentPct}%`;
+    aiPricingExplanation.textContent = explanationParts.join(" + ");
+    
+    const mockConfidence = 93 + (dateInput.value ? (new Date(dateInput.value).getDate() % 5) : 2);
+    aiPricingConfidence.textContent = `${mockConfidence}%`;
+    
+    // Update labels
     summaryPackage.textContent = `₹${packageTotal.toLocaleString('en-IN', {maximumFractionDigits:2})}`;
     summaryGuests.textContent = `${adultsCount} Adult${adultsCount > 1 ? 's' : ''}, ${childrenCount} Kid${childrenCount > 1 ? 's' : ''}`;
     summaryAddons.textContent = `₹${addonTotal.toLocaleString('en-IN', {maximumFractionDigits:2})}`;
     summaryTax.textContent = `₹${taxTotal.toLocaleString('en-IN', {maximumFractionDigits: 2})}`;
     summaryTotal.textContent = `₹${grandTotal.toLocaleString('en-IN', {maximumFractionDigits: 2})}`;
+    
+    // Trigger recommendation model update
+    updateRecommendations(packageSelect.options[packageSelect.selectedIndex].getAttribute('data-name'));
     
     return {
       packagePrice: packageCostPerGuest,
@@ -263,6 +317,94 @@ function initBookingSimulator() {
       taxTotal,
       grandTotal
     };
+  }
+
+  // ==========================================================
+  // AI Recommendation Engine Simulator (Association Rules)
+  // ==========================================================
+  function updateRecommendations(packageName) {
+    aiRecList.innerHTML = '';
+    let recommendations = [];
+    
+    if (packageName === "Nature Starter") {
+      if (!chkGuide.checked) {
+        recommendations.push({
+          id: 'guide',
+          title: 'Private Nature Guide',
+          desc: 'Recommended by Guide Matcher model',
+          match: '92% Match',
+          targetCheckbox: chkGuide,
+          targetItem: document.getElementById('addon-guide')
+        });
+      }
+      if (!chkBonfire.checked) {
+        recommendations.push({
+          id: 'bonfire',
+          title: 'Campfire Setup',
+          desc: 'Recommended by Family Night model',
+          match: '88% Match',
+          targetCheckbox: chkBonfire,
+          targetItem: document.getElementById('addon-bonfire')
+        });
+      }
+    } else if (packageName === "Adventure Pro") {
+      if (!chkBuffet.checked) {
+        recommendations.push({
+          id: 'buffet',
+          title: 'Organic Buffet Dining',
+          desc: 'Recommended by Hunger Pred model',
+          match: '95% Match',
+          targetCheckbox: chkBuffet,
+          targetItem: document.getElementById('addon-buffet')
+        });
+      }
+      if (!chkGuide.checked) {
+        recommendations.push({
+          id: 'guide',
+          title: 'Private Nature Guide',
+          desc: 'Recommended by Trail Safety model',
+          match: '86% Match',
+          targetCheckbox: chkGuide,
+          targetItem: document.getElementById('addon-guide')
+        });
+      }
+    } else if (packageName === "Luxury Agro Retreat") {
+      if (!chkBuffet.checked) {
+        recommendations.push({
+          id: 'buffet',
+          title: 'Organic Buffet Dining',
+          desc: 'Recommended by Luxury Dining model',
+          match: '98% Match',
+          targetCheckbox: chkBuffet,
+          targetItem: document.getElementById('addon-buffet')
+        });
+      }
+    }
+    
+    if (recommendations.length > 0) {
+      aiRecBox.style.display = 'block';
+      recommendations.forEach(rec => {
+        const item = document.createElement('div');
+        item.className = 'ai-rec-item';
+        item.innerHTML = `
+          <div class="ai-rec-info">
+            <span class="ai-rec-title">${rec.title}</span>
+            <span class="ai-rec-match">${rec.match} &middot; <span style="color: var(--text-muted); font-weight: normal; font-size: 0.68rem;">${rec.desc}</span></span>
+          </div>
+          <button type="button" class="btn-rec-add" data-id="${rec.id}">Add Experience</button>
+        `;
+        
+        item.querySelector('.btn-rec-add').addEventListener('click', () => {
+          rec.targetCheckbox.checked = true;
+          rec.targetItem.classList.add('selected');
+          calculateTotal();
+        });
+        
+        aiRecList.appendChild(item);
+      });
+    } else {
+      aiRecBox.style.display = 'none';
+    }
   }
   
   form.addEventListener('submit', (e) => {
@@ -617,12 +759,57 @@ function initReviewsCarousel() {
   const reviewForm = document.getElementById('review-form');
   const starSelector = document.getElementById('star-selector');
   const starBtns = starSelector.querySelectorAll('.star-btn');
+  const messageInput = document.getElementById('review-message');
+  const sentimentWrap = document.getElementById('sentiment-live-badge-wrap');
+  const sentimentBadge = document.getElementById('sentiment-live-badge');
   
   let activeIndex = 0;
   let activeRating = 5;
   let reviews = [];
   
-  // Star button selector logic
+  // Real-time NLP Sentiment Lexicon scoring engine
+  const posWords = ['great', 'awesome', 'incredible', 'amazing', 'beautiful', 'clean', 'friendly', 'happy', 'love', 'loved', 'good', 'nice', 'perfect', 'stellar', 'helpful', 'luxury', 'cozy', 'enjoyed', 'excellent', 'heritage', 'traditional', 'delicious', 'organic', 'peaceful', 'wonderful'];
+  const negWords = ['bad', 'worst', 'poor', 'dirty', 'unfriendly', 'expensive', 'crowded', 'slow', 'waste', 'hate', 'terrible', 'horrible', 'annoying', 'broken', 'difficult', 'noisy', 'rude'];
+
+  function classifySentiment(text) {
+    if (!text || text.trim().length < 3) {
+      return { label: 'Neutral', score: 0.50 };
+    }
+    const words = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").split(/\s+/);
+    let posCount = 0;
+    let negCount = 0;
+    
+    words.forEach(w => {
+      if (posWords.includes(w)) posCount++;
+      if (negWords.includes(w)) negCount++;
+    });
+    
+    const totalCount = posCount + negCount;
+    if (totalCount === 0) {
+      return { label: 'Neutral', score: 0.50 };
+    }
+    
+    const score = 0.5 + ((posCount - negCount) / (totalCount * 2));
+    let label = 'Neutral';
+    if (score > 0.55) label = 'Positive';
+    if (score < 0.45) label = 'Negative';
+    
+    return { label, score: parseFloat(score.toFixed(2)) };
+  }
+
+  // Real-time input listener for NLP preview
+  messageInput.addEventListener('input', () => {
+    const text = messageInput.value;
+    if (text.trim().length >= 5) {
+      const result = classifySentiment(text);
+      sentimentWrap.style.display = 'flex';
+      sentimentBadge.textContent = `${result.label} (${Math.round(result.score * 100)}%)`;
+      sentimentBadge.className = `sentiment-badge ${result.label.toLowerCase()}`;
+    } else {
+      sentimentWrap.style.display = 'none';
+    }
+  });
+  
   starBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       activeRating = parseInt(btn.getAttribute('data-value'));
@@ -656,14 +843,13 @@ function initReviewsCarousel() {
       })
       .catch(err => {
         console.warn("Backend unavailable, loading reviews from LocalStorage:", err);
-        // Fallback: Read reviews from local storage, or use defaults
         const localReviews = JSON.parse(localStorage.getItem('greenhaven_reviews') || '[]');
         if (localReviews.length > 0) {
           reviews = localReviews;
         } else {
           reviews = [
-            { name: "Sanjay Rao", title: "Family Visitor", rating: 5, text: "The trekking and the cottage package were absolutely incredible. The local food is cooked organically and reminds us of traditional home dishes. Our kids loved the boating!" },
-            { name: "Anjali K.", title: "Solo Backpacker", rating: 4, text: "Great place for nature photographers and hikers. The guides are extremely knowledgeable about native fauna. Accommodation in the tents is very clean and standard." }
+            { name: "Sanjay Rao", title: "Family Visitor", rating: 5, text: "The trekking and the cottage package were absolutely incredible. The local food is cooked organically and reminds us of traditional home dishes. Our kids loved the boating!", sentiment_label: "Positive", sentiment_score: 0.95 },
+            { name: "Anjali K.", title: "Solo Backpacker", rating: 4, text: "Great place for nature photographers and hikers. The guides are extremely knowledgeable about native fauna. Accommodation in the tents is very clean and standard.", sentiment_label: "Positive", sentiment_score: 0.88 }
           ];
         }
         renderReviews();
@@ -682,13 +868,15 @@ function initReviewsCarousel() {
       return;
     }
     
+    const sentiment = classifySentiment(message);
+    
     submitBtn.disabled = true;
     submitBtn.textContent = 'Posting review...';
     
     fetch('/api/reviews', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, rating: activeRating, text: message })
+      body: JSON.stringify({ name, rating: activeRating, text: message, sentiment_label: sentiment.label, sentiment_score: sentiment.score })
     })
     .then(res => {
       if (!res.ok) throw new Error("Failed to submit review to SQL.");
@@ -698,12 +886,11 @@ function initReviewsCarousel() {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Submit Review';
       
-      // Reset form
       reviewForm.reset();
+      sentimentWrap.style.display = 'none';
       activeRating = 5;
       updateStarUI(activeRating);
       
-      // Update local state list and re-render
       reviews.unshift(savedReview);
       renderReviews();
       
@@ -711,13 +898,14 @@ function initReviewsCarousel() {
     })
     .catch(err => {
       console.warn("Backend unavailable, saving review to LocalStorage Demo Mode:", err);
-      // Fallback: Save review to LocalStorage
       const mockSavedReview = {
         id: Date.now(),
         name: name,
         title: "Verified Visitor (Demo Mode)",
         rating: activeRating,
-        text: message
+        text: message,
+        sentiment_label: sentiment.label,
+        sentiment_score: sentiment.score
       };
       
       const localReviews = JSON.parse(localStorage.getItem('greenhaven_reviews') || '[]');
@@ -727,6 +915,7 @@ function initReviewsCarousel() {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Submit Review';
       reviewForm.reset();
+      sentimentWrap.style.display = 'none';
       activeRating = 5;
       updateStarUI(activeRating);
       
@@ -764,12 +953,17 @@ function initReviewsCarousel() {
       }
       
       const initials = review.name.split(' ').map(n => n[0]).join('').substring(0, 2);
+      const sentimentClass = review.sentiment_label ? review.sentiment_label.toLowerCase() : 'neutral';
+      const sentimentText = review.sentiment_label ? `${review.sentiment_label} (${Math.round((review.sentiment_score || 0.5) * 100)}%)` : 'Neutral (50%)';
       
       const slide = document.createElement('div');
       slide.className = 'review-slide';
       slide.innerHTML = `
         <div class="review-card">
-          <div class="review-stars">${starsHtml}</div>
+          <div class="review-stars-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div class="review-stars">${starsHtml}</div>
+            <span class="sentiment-badge ${sentimentClass}" style="font-size: 0.65rem;">${sentimentText}</span>
+          </div>
           <p class="review-text">${review.text}</p>
           <div class="review-author">
             <div class="review-avatar">${initials || 'V'}</div>

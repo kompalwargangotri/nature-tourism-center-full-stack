@@ -22,9 +22,21 @@ def init_db():
             title TEXT NOT NULL,
             rating INTEGER,
             text TEXT NOT NULL,
+            sentiment_label TEXT DEFAULT 'Neutral',
+            sentiment_score REAL DEFAULT 0.50,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+
+    # Run migrations to alter table if columns don't exist in existing greenhaven.db
+    try:
+        c.execute("ALTER TABLE reviews ADD COLUMN sentiment_label TEXT DEFAULT 'Neutral'")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        c.execute("ALTER TABLE reviews ADD COLUMN sentiment_score REAL DEFAULT 0.50")
+    except sqlite3.OperationalError:
+        pass
 
     # 2. Create Bookings Table
     c.execute('''
@@ -57,10 +69,10 @@ def init_db():
     # Seed default reviews if table is empty
     c.execute("SELECT COUNT(*) FROM reviews")
     if c.fetchone()[0] == 0:
-        c.execute("INSERT INTO reviews (name, title, rating, text) VALUES (?, ?, ?, ?)",
-                  ("Sanjay Rao", "Family Visitor", 5, "The trekking and the cottage package were absolutely incredible. The local food is cooked organically and reminds us of traditional home dishes. Our kids loved the boating!"))
-        c.execute("INSERT INTO reviews (name, title, rating, text) VALUES (?, ?, ?, ?)",
-                  ("Anjali K.", "Solo Backpacker", 4, "Great place for nature photographers and hikers. The guides are extremely knowledgeable about native fauna. Accommodation in the tents is very clean and standard."))
+        c.execute("INSERT INTO reviews (name, title, rating, text, sentiment_label, sentiment_score) VALUES (?, ?, ?, ?, ?, ?)",
+                  ("Sanjay Rao", "Family Visitor", 5, "The trekking and the cottage package were absolutely incredible. The local food is cooked organically and reminds us of traditional home dishes. Our kids loved the boating!", "Positive", 0.95))
+        c.execute("INSERT INTO reviews (name, title, rating, text, sentiment_label, sentiment_score) VALUES (?, ?, ?, ?, ?, ?)",
+                  ("Anjali K.", "Solo Backpacker", 4, "Great place for nature photographers and hikers. The guides are extremely knowledgeable about native fauna. Accommodation in the tents is very clean and standard.", "Positive", 0.88))
         print("Database seeded with default review comments.")
         
     conn.commit()
@@ -79,7 +91,7 @@ class GreenHavenHandler(http.server.SimpleHTTPRequestHandler):
             db_path = os.path.join(os.path.dirname(__file__), 'greenhaven.db')
             conn = sqlite3.connect(db_path)
             c = conn.cursor()
-            c.execute("SELECT id, name, title, rating, text FROM reviews ORDER BY id DESC")
+            c.execute("SELECT id, name, title, rating, text, sentiment_label, sentiment_score FROM reviews ORDER BY id DESC")
             rows = c.fetchall()
             conn.close()
             
@@ -90,14 +102,16 @@ class GreenHavenHandler(http.server.SimpleHTTPRequestHandler):
                     "name": r[1],
                     "title": r[2],
                     "rating": r[3],
-                    "text": r[4]
+                    "text": r[4],
+                    "sentiment_label": r[5] if r[5] else "Neutral",
+                    "sentiment_score": r[6] if r[6] is not None else 0.50
                 })
                 
             self.wfile.write(json.dumps(reviews).encode('utf-8'))
         else:
             # Fallback to standard handler for static files (html, css, js, images)
             super().do_GET()
-
+ 
     # Custom API POST Requests
     def do_POST(self):
         content_length = int(self.headers['Content-Length'])
@@ -105,12 +119,14 @@ class GreenHavenHandler(http.server.SimpleHTTPRequestHandler):
         data = json.loads(post_data.decode('utf-8'))
         
         db_path = os.path.join(os.path.dirname(__file__), 'greenhaven.db')
-
+ 
         # 1. Review Submission Endpoint
         if self.path == '/api/reviews':
             name = data.get('name')
             rating = data.get('rating')
             text = data.get('text')
+            sentiment_label = data.get('sentiment_label', 'Neutral')
+            sentiment_score = data.get('sentiment_score', 0.50)
             
             if not name or not rating or not text:
                 self.send_response(400)
@@ -118,15 +134,15 @@ class GreenHavenHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({"error": "Missing name, rating, or description."}).encode('utf-8'))
                 return
-
+ 
             conn = sqlite3.connect(db_path)
             c = conn.cursor()
-            c.execute("INSERT INTO reviews (name, title, rating, text) VALUES (?, ?, ?, ?)",
-                      (name, "Verified Visitor", rating, text))
+            c.execute("INSERT INTO reviews (name, title, rating, text, sentiment_label, sentiment_score) VALUES (?, ?, ?, ?, ?, ?)",
+                      (name, "Verified Visitor", rating, text, sentiment_label, sentiment_score))
             new_id = c.lastrowid
             conn.commit()
             conn.close()
-
+ 
             self.send_response(201)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
@@ -135,7 +151,9 @@ class GreenHavenHandler(http.server.SimpleHTTPRequestHandler):
                 "name": name,
                 "title": "Verified Visitor",
                 "rating": rating,
-                "text": text
+                "text": text,
+                "sentiment_label": sentiment_label,
+                "sentiment_score": sentiment_score
             }).encode('utf-8'))
 
         # 2. Booking Submission Endpoint

@@ -310,6 +310,17 @@
                   </div>
                 </div>
               </div>
+              
+              <!-- AI Recommended Experiences Engine -->
+              <div class="ai-recommendations-box" id="ai-recommendations-box" style="display: none;">
+                <div class="ai-recommender-header">
+                  <span class="ai-spark-icon">✨</span>
+                  <span>AI Recommendations for You</span>
+                </div>
+                <div id="ai-recommendations-list" class="ai-rec-list">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
             </div>
             
             <button type="submit" class="btn btn-accent btn-primary" style="width: 100%;">
@@ -345,7 +356,22 @@
             </div>
           </div>
           
-          <div class="about-feature-item" style="gap: 8px;">
+          <!-- AI Dynamic Pricing Engine Display -->
+          <div class="ai-pricing-indicator" id="ai-pricing-indicator">
+            <div class="ai-indicator-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px; margin-top: 1px;">
+                <circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+              <span>AI Dynamic Pricing Engine</span>
+            </div>
+            <p id="ai-pricing-explanation">Evaluating seasonal dynamic factors...</p>
+            <div class="ai-pricing-meta">
+              <span>Confidence: <strong id="ai-pricing-confidence">95%</strong></span>
+              <span>Adjustment: <strong id="ai-pricing-adjustment">0%</strong></span>
+            </div>
+          </div>
+          
+          <div class="about-feature-item" style="gap: 8px; margin-top: 15px;">
             <svg viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2" style="width: 18px; height: 18px; margin-top: 2px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
             <p style="font-size: 0.85rem; color: var(--text-muted);">Kids under 12 receive a 50% discount on package prices.</p>
           </div>
@@ -507,6 +533,12 @@
             <div class="form-group" style="margin-bottom: 20px;">
               <label for="review-message">Review Description</label>
               <textarea id="review-message" rows="4" style="width: 100%; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; outline: none; background: var(--bg-main); color: var(--text-main); font-family: var(--font-body);" required placeholder="Share your experience..."></textarea>
+            </div>
+            
+            <!-- Live NLP Sentiment Predictor Badge -->
+            <div class="sentiment-live-badge-wrap" id="sentiment-live-badge-wrap" style="display: none;">
+              <span style="font-weight: 500; color: var(--text-muted);">Real-time NLP Sentiment:</span>
+              <span id="sentiment-live-badge" class="sentiment-badge neutral">Analyzing...</span>
             </div>
             
             <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Review</button>

@@ -2405,4 +2405,191 @@ footer {
   transition: outline var(--transition-normal) !important;
 }
 
+/* ==========================================================================
+   12. AI/ML Engine Styles (Pricing, Recommendation, NLP sentiment)
+   ========================================================================== */
+.ai-pricing-indicator {
+  margin-top: 15px;
+  background: rgba(38, 162, 75, 0.05);
+  border: 1px solid rgba(38, 162, 75, 0.15);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-size: 0.82rem;
+  color: var(--text-main);
+  animation: pulse-border 3s infinite alternate;
+}
+
+@keyframes pulse-border {
+  0% { border-color: rgba(38, 162, 75, 0.15); }
+  100% { border-color: var(--primary-light); }
+}
+
+.ai-indicator-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--primary-light);
+  margin-bottom: 6px;
+}
+
+.ai-indicator-header svg {
+  animation: rotate-spinner 8s linear infinite;
+}
+
+@keyframes rotate-spinner {
+  100% { transform: rotate(360deg); }
+}
+
+.ai-pricing-indicator p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.ai-pricing-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  border-top: 1px dashed var(--border-color);
+  padding-top: 6px;
+  color: var(--text-muted);
+}
+
+.ai-pricing-meta strong {
+  color: var(--primary);
+}
+
+/* AI Recommendations Box */
+.ai-recommendations-box {
+  margin-top: 18px;
+  background: rgba(38, 92, 50, 0.04);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+}
+
+.ai-recommender-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.ai-spark-icon {
+  animation: spark-dance 1s infinite alternate;
+}
+
+@keyframes spark-dance {
+  0% { transform: scale(0.9) rotate(-10deg); }
+  100% { transform: scale(1.1) rotate(10deg); }
+}
+
+.ai-rec-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ai-rec-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card-solid);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  font-size: 0.78rem;
+  animation: slide-in-rec 0.3s ease-out;
+}
+
+@keyframes slide-in-rec {
+  0% { opacity: 0; transform: translateY(5px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.ai-rec-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-rec-title {
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.ai-rec-match {
+  font-size: 0.68rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.btn-rec-add {
+  background: var(--primary);
+  color: var(--text-light);
+  border: none;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background var(--transition-fast);
+}
+
+.btn-rec-add:hover {
+  background: var(--primary-light);
+}
+
+.btn-rec-add.added {
+  background: var(--secondary-light);
+  cursor: default;
+}
+
+/* Sentiment live badge style */
+.sentiment-live-badge-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-card-solid);
+  margin-bottom: 15px;
+  font-size: 0.82rem;
+}
+
+.sentiment-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sentiment-badge.positive {
+  background: rgba(38, 162, 75, 0.12);
+  color: hsl(142, 72%, 26%);
+  border: 1px solid rgba(38, 162, 75, 0.25);
+}
+
+.sentiment-badge.negative {
+  background: rgba(225, 45, 45, 0.1);
+  color: hsl(0, 75%, 45%);
+  border: 1px solid rgba(225, 45, 45, 0.2);
+}
+
+.sentiment-badge.neutral {
+  background: rgba(142, 170, 150, 0.15);
+  color: var(--text-muted);
+  border: 1px solid rgba(142, 170, 150, 0.25);
+}
+
+
 
