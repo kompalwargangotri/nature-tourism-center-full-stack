@@ -679,7 +679,7 @@ function initBookingSimulator() {
       document.body.style.overflow = 'hidden';
       showToast('Booking success! Gate pass generated (Demo Mode).', 'success');
     });
-  });
+  };
   
   function closeModal() {
     modalOverlay.classList.remove('active');
