@@ -51,12 +51,12 @@ Nature Tourism Center Full Stack is a modern tourism and travel management platf
 | Layer | Technologies |
 |------|------|
 | Frontend | HTML5, CSS3, JavaScript |
-| Backend | Python, Flask/FastAPI (server.py) |
+| Backend | Python Standard Library (http.server & sqlite3 API) |
 | Database | SQLite |
 | Styling | Custom CSS |
 | Client Interaction | JavaScript DOM Manipulation |
-| AI Features | NLP, Rule-Based Chatbot |
-| Deployment | GitHub Pages (Frontend) |
+| AI Features | NLP Lexicon Analyzer, Speech Synthesis & Rule-Based Chatbot |
+| Deployment | GitHub Pages (Frontend static demo fallback) |
 
 ## Project Structure
 
@@ -65,7 +65,7 @@ nature-tourism-center-full-stack/
 ├── css/
 │   └── main.css
 ├── img/
-│   ├── avatar.jpg
+│   ├── avatar.png
 │   ├── bg1.jpg
 │   ├── logo.png
 │   └── ...
@@ -138,7 +138,7 @@ python server.py
 The backend will run at:
 
 ```text
-http://127.0.0.1:5000
+http://127.0.0.1:8080
 ```
 
 ### Open the Frontend
@@ -152,7 +152,7 @@ index.html
 or visit:
 
 ```text
-http://127.0.0.1:5000
+http://127.0.0.1:8080
 ```
 
 (depending on your server configuration)
@@ -173,6 +173,12 @@ The database stores:
 - Demonstration tourism data
 
 ## Testing
+
+### Manual Verification
+1. Open the website, click on **Book Now**, enter a booking, and select dates in monsoon (e.g., July) to see dynamic seasonal discounts.
+2. Click **Confirm Booking** to generate the scannable gate-pass ticket.
+3. Submit a review with words like "beautiful", "cozy", or "terrible" to see real-time NLP sentiment analysis.
+4. Interact with the floating **Aranya AI Concierge Chatbot** at the bottom-right corner for voice-narrated assistance.
 
 ## Repository Data Policy
 
@@ -198,5 +204,5 @@ The following files are excluded from version control:
 
 **Gangotri Kompalwar**
 
-- GitHub: https://github.com/kompalwargangotri
-- LinkedIn: https://www.linkedin.com/in/gangotri-kompalwar-4635b9359
+- GitHub: <https://github.com/kompalwargangotri>
+- LinkedIn: <https://www.linkedin.com/in/gangotri-kompalwar-4635b9359>
