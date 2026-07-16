@@ -1,140 +1,134 @@
-# 🌲 GreenHaven Eco-Retreat: AI-Powered Full-Stack Web Application
+# 🌲 GreenHaven Eco-Retreat
 
-An interactive, responsive, single-page full-stack web application designed for a premium nature tourism center. Built on vanilla web standards (HTML5/CSS3/JavaScript) and a lightweight Python/SQLite backend, this project is engineered to showcase **AI/ML integration** within real-world full-stack architectures—specifically tailored for a B.Tech career track in Artificial Intelligence and Machine Learning.
+GreenHaven Eco-Retreat is an interactive, responsive, single-page full-stack nature tourism platform. It combines a premium, animated frontend (featuring Light/Dark theme toggling, scroll reveals, and glowing background accent orbs) with a lightweight Python/SQLite backend. It features integrated client-side and server-side AI/ML simulators, including an NLP sentiment classifier for reviews, a dynamic pricing regression engine, an affinity experience recommender, and a speech-enabled AI Concierge chatbot (Aranya).
 
----
+> This repository is an academic prototype. Generated database binaries, server log caches, and temporary local test assets are intentionally excluded from Git.
 
-## 📸 Screenshots
+## Key Features
 
-### 1. Modern GreenHaven Eco-Retreat Homepage
-![GreenHaven Eco-Retreat Homepage](screenshots/homepage.png)
+- **Interactive AI Chatbot & Voice Concierge (Aranya)**: Keyword NLP response matching, voice output (`speechSynthesis`), dynamic audio soundwave visualizer, and scroll-to-section tour guide.
+- **NLP Review Sentiment Classifier**: On-input review analyzer computing sentiment polarity scores (Positive/Negative/Neutral) dynamically in the browser, persisting classification labels to the SQLite database.
+- **Predictive Dynamic Pricing Regressor**: Simulates seasonal demand (Monsoons off-peak discount vs peak winter holiday surcharge) and weekend premiums, with variable model confidence predictions.
+- **Affinity Recommendation Engine**: Suggests experience add-ons based on the selected package (Starter, Pro, Luxury).
+- **Light/Dark Emerald Theme Toggler**: Complete HSL-variable system with client-side setting persistence.
+- **Scroll-Reveal Animation System**: Native `IntersectionObserver` scroll triggers with smooth fade and slide delays.
+- **Floating Ambient Background Orbs**: Blurred gradient background accent bubbles drifting on CSS keyframes.
+- **Pass & Booking Receipt Generator**: Printable entry ticket modal with a simulated barcode scanner layout.
+- **Full-Stack REST Architecture**: SQLite database tracking reviews, bookings, and contact details with safe dynamic startup migrations.
 
-### 2. Interactive AI Concierge Chatbot & Soundwaves Visualizer
-![AI Concierge Chatbot Aranya](screenshots/ai_chatbot.png)
+## Application Screenshots
 
-### 3. Dynamic pricing regression engine (Monsoon Discount applied)
-![AI Dynamic Pricing Engine](screenshots/dynamic_pricing.png)
+<table>
+  <tr>
+    <th>Homepage</th>
+    <th>AI Chatbot</th>
+    <th>Dynamic Pricing</th>
+    <th>NLP Sentiment</th>
+  </tr>
+  <tr>
+    <td><img src="screenshots/homepage.png" width="180" alt="GreenHaven homepage landing page"></td>
+    <td><img src="screenshots/ai_chatbot.png" width="180" alt="AI chatbot Aranya panel"></td>
+    <td><img src="screenshots/dynamic_pricing.png" width="180" alt="AI dynamic pricing calculator"></td>
+    <td><img src="screenshots/nlp_sentiment.png" width="180" alt="Live review NLP sentiment analysis"></td>
+  </tr>
+  <tr>
+    <th>Dark Theme</th>
+    <th>Booking Receipt</th>
+    <th>Package Filter</th>
+    <th>-</th>
+  </tr>
+  <tr>
+    <td><img src="screenshots/dark_theme.png" width="180" alt="Dark theme emerald layout"></td>
+    <td><img src="screenshots/booking_receipt.png" width="180" alt="Scannable ticket receipt modal"></td>
+    <td><img src="screenshots/package_filter.png" width="180" alt="Filtered adventure packages"></td>
+    <td>-</td>
+  </tr>
+</table>
 
-### 4. Real-time review Natural Language Processing sentiment scoring
-![Real-time NLP Sentiment Analyzer](screenshots/nlp_sentiment.png)
+## Technology Stack
 
-### 5. Premium Dark Theme Mode Layout (Emerald Theme)
-![Premium Dark Theme Mode](screenshots/dark_theme.png)
+| Layer | Technologies |
+|---|---|
+| Frontend Layout | HTML5, Vanilla CSS3 (HSL custom variables, Flexbox, Grid) |
+| Motion & Animation | CSS Keyframes, JS `IntersectionObserver` API |
+| Backend API | Python HTTP server, built-in REST routing |
+| Database | SQLite3, relational schema, automated start migrations |
+| AI Chatbot / Voice | Web Speech API (`speechSynthesis`), HTML Canvas waves, keyword NLP |
+| ML Simulators | Lexicon Sentiment Classifier, Seasonal Pricing Regressor, Affinity Recommender |
+| Cache & Local Fallbacks | HTML5 LocalStorage (Static Demo Mode fallback) |
 
-### 6. Interactive Ticket Receipt Modal (with scannable entry barcode)
-![Interactive Ticket Receipt Pass](screenshots/booking_receipt.png)
+## Project Structure
 
-### 7. Filterable packages dashboard (Adventure package selection active)
-![Filterable packages dashboard](screenshots/package_filter.png)
-
----
-
-## 🚀 Live Demo & Hosting
-
-The project supports a dual-mode execution model:
-
-* **Static Demo Mode**: Automatically runs client-side using `localStorage` caching when hosted on static hosting services (like **GitHub Pages**).
-* **Full-Stack Mode**: Connects dynamically via REST APIs to a local Python server and SQLite relational database.
-
----
-
-## 🧠 Integrated AI/ML Features (Resume Highlights)
-
-### 1. 💬 NLP Sentiment Analysis Classifier
-
-* **Module**: Real-Time Client-Side Natural Language Processing.
-* **Implementation**: Parses user testimonials in real time using a tokenization and lexicon-scoring engine inside the reviews submission form.
-* **Dynamic Variation**: Computes numerical sentiment polarity scores and maps text to `Positive`, `Negative`, or `Neutral` labels.
-* **Database Storage**: On submission, these NLP metrics (`sentiment_label` and `sentiment_score`) are sent via REST API and persisted in the SQLite backend.
-
-### 2. 📈 Predictive Dynamic Pricing Regressor
-
-* **Module**: Demand Forecasting & Rate Optimization Simulator.
-* **Implementation**: Calculates checkout surcharges or discounts dynamically based on calendar input features:
-  * **Seasonality Surcharges**: Monsoons in India trigger an off-peak **-15% discount**, while winter holiday months trigger a **+12% premium**.
-  * **Day-of-Week Factor**: Fridays, Saturdays, and Sundays add a **+5% weekend surcharge**.
-* **Dynamic Variation**: The model's confidence rating dynamically fluctuates (e.g. 93% to 97%) based on date variables, simulating live active inferences.
-
-### 3. 🎯 Affinity Recommendation Engine
-
-* **Module**: Association-Rules & Collaborative Filtering Simulator.
-* **Implementation**: Tracks chosen packages (Nature Starter, Adventure Pro, Luxury Retreat) and cross-references user selections to display recommended experience add-ons (e.g., matching trekking tours with Wilderness Guides or dining packages) that can be added to the invoice with a single click.
-
-### 4. 🎙️ AI Concierge & Virtual Voice Guide (Aranya)
-
-* **Module**: Speech Synthesis & Keyword NLP Chatbot.
-* **Implementation**: An interactive floating glassmorphic concierge widget featuring a custom profile avatar:
-  * **Speech Narration**: Uses the browser's native Web Speech API (`speechSynthesis`) to read response text aloud, triggering dynamic bouncing soundwave animations.
-  * **Section-by-Section Scrolled Tour**: Guides visitors through the website sections with highlights, complete with Pause, Resume, and Stop controls.
-  * **NLP Response Engine**: Analyzes user text queries to answer questions about bookings, pricing, food, and database structures.
-
----
-
-## 🛠️ Full-Stack Technical Stack
-
-* **Frontend**:
-  * **HTML5 & CSS3 Variables**: Themeable design using HSL custom properties. Includes responsive CSS Grid/Flexbox layouts.
-  * **Light/Dark Theme Controller**: Client-side setting toggler with persistent storage across reloads.
-  * **Scroll-Reveal system**: Views fade and slide up on scroll using a high-performance, lightweight **`IntersectionObserver`** API.
-  * **Aesthetic Accents**: Soft animated glowing orbs drifting in the background for modern visual interest.
-  * **Printable Pass Generator**: Computes guest pricing (with 50% kid discounts) and compiles a printable pass modal with a simulated barcode reader.
-* **Backend**:
-  * `server.py`: A zero-dependency REST API and static file server built on Python's built-in `http.server` library.
-* **Database**:
-  * `sqlite3`: Relational database (`greenhaven.db`) mapping visitor reviews (with sentiment scores), simulator bookings, and helpdesk contact details.
-
----
-
-## 📂 Project Directory Structure
-
-```text
+~~~text
+nature-tourism-retreat/
 ├── css/
 │   └── main.css             # Main stylesheet with layout grid, variables, themes, & AI styling
 ├── js/
 │   └── app.js               # Client controller (NLP sentiment, dynamic regressor, chatbot, etc.)
 ├── img/
-│   ├── logo.png             # Circular brand logo for GreenHaven Eco-Retreat
+│   ├── logo.png             # Brand logo for GreenHaven Eco-Retreat
 │   ├── avatar.png           # Profile avatar for Aranya (AI Concierge)
-│   └── [photos...]          # Gallery activity assets (trekking, camping, dining)
+│   └── [photos...]          # Activity assets (trekking, camping, dining)
+├── screenshots/
+│   ├── homepage.png         # Screenshot of initial landing page
+│   ├── ai_chatbot.png       # Screenshot of open chatbot panel
+│   ├── dynamic_pricing.png  # Screenshot of active pricing calculations
+│   ├── nlp_sentiment.png    # Screenshot of live review sentiment tagging
+│   ├── dark_theme.png       # Screenshot of dark slate theme
+│   ├── booking_receipt.png  # Screenshot of generated barcode pass modal
+│   └── package_filter.png   # Screenshot of filtered adventure cards
 ├── server.py                # Python HTTP Server and REST API routers
 ├── greenhaven.db            # Relational SQLite database
 ├── README.md                # Project documentation
 └── .gitignore               # Excludes database files and cache logs from git tracking
-```
+~~~
 
----
+## Prerequisites
 
-## ⚙️ How to Setup and Run Locally
+- Python 3.x installed
+- A modern web browser with speech support (e.g., Google Chrome)
 
-### Prerequisites
+## Backend Setup
 
-* Python 3.x installed.
+Run this command from the repository root:
 
-### Execution
+~~~powershell
+python server.py
+~~~
 
-1. **Clone the Repository**:
+*The console will initialize, run database migrations, seed default reviews, and start listening.*
 
-    ```bash
-    git clone https://github.com/YOUR_USERNAME/nature-tourism-retreat.git
-    cd nature-tourism-retreat
-    ```
+The API runs at:
 
-2. **Start the Local Backend Server**:
+~~~text
+http://127.0.0.1:8080
+~~~
 
-    ```bash
-    python server.py
-    ```
+## Main API Endpoints
 
-    *The console will initialize, run database migrations, seed default reviews, and start listening.*
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/api/reviews` | Retrieve all validated testimonials and NLP ratings |
+| POST | `/api/reviews` | Submit new testimonial with NLP sentiment metrics |
+| POST | `/api/bookings` | Submit a dynamic booking request |
+| POST | `/api/contact` | Submit contact helpdesk inquiries |
 
-3. **Launch the Application**:
-    * Open your web browser and navigate to: `http://127.0.0.1:8080/`
-    * *Tip*: Use query params `?t=123` to bypass browser caching when testing stylesheet modifications.
+## Testing and Validation
 
----
+Validate the Python source:
 
-## 👤 Developer Profile
+~~~powershell
+python -m compileall server.py
+~~~
 
-* **Developer**: Gangotri Kompalwar
-* **Credentials**: Final Year B.Tech Student
-* **Focus Area**: Artificial Intelligence & Machine Learning (AI/ML)
+## Repository Data Policy
+
+- The local SQLite database binary (`greenhaven.db`) is excluded from Git to keep the repository lightweight.
+- The Python server runs migrations and seeds default test data automatically on startup if the database is missing.
+
+## Author
+
+**Gangotri Kompalwar**
+
+- GitHub: [kompalwargangotri](https://github.com/kompalwargangotri)
+- LinkedIn: [Gangotri Kompalwar](https://www.linkedin.com/in/gangotri-kompalwar-4635b9359)
