@@ -4,6 +4,46 @@
 
 ---
 
+## 📸 Screenshots
+
+### 1. Modern GreenHaven Eco-Retreat Homepage
+![GreenHaven Eco-Retreat Homepage](screenshots/homepage.png)
+
+### 2. Interactive AI Concierge Chatbot & Soundwaves Visualizer
+![AI Concierge Chatbot Aranya](screenshots/ai_chatbot.png)
+
+### 3. Dynamic pricing regression engine (Monsoon Discount applied)
+![AI Dynamic Pricing Engine](screenshots/dynamic_pricing.png)
+
+### 4. Real-time review Natural Language Processing sentiment scoring
+![Real-time NLP Sentiment Analyzer](screenshots/nlp_sentiment.png)
+
+### 5. Premium Dark Theme Mode Layout (Emerald Theme)
+![Premium Dark Theme Mode](screenshots/dark_theme.png)
+
+### 6. Interactive Ticket Receipt Modal (with scannable entry barcode)
+![Interactive Ticket Receipt Pass](screenshots/booking_receipt.png)
+
+### 7. Filterable packages dashboard (Adventure package selection active)
+![Filterable packages dashboard](screenshots/package_filter.png)
+
+### 8. Live Weather Widget (Open-Meteo Integration)
+![Weather Status Widget](screenshots/weather_widget.png)
+
+### 9. User Authentication & Booking Form Auto-Prefill
+![Guest Session Auto-Prefill](screenshots/form_prefilled.png)
+
+### 10. Simulated Credit Card Payment Gateway (Luhn validation active)
+![Payment Checkout Interface](screenshots/payment_modal.png)
+
+### 11. Interactive Secure Pass Ticket Pass (Gate Access Ticket)
+![Gate Access Ticket](screenshots/success_receipt.png)
+
+### 12. Full-Stack Administration Dashboard (`admin.html`)
+![Administrative Analytics Dashboard](screenshots/admin_dashboard.png)
+
+---
+
 ## Key Features
 
 ### 🧠 Integrated AI & Intelligent Heuristic Highlights
@@ -71,23 +111,29 @@ graph TD
 ## Project Structure
 
 ```text
-nature-tourism-center-full-stack/
+greenhaven-ai-eco-retreat/
 ├── css/
-│   └── main.css
+│   └── main.css               # Core design system and theme-aware stylesheet
 ├── js/
-│   └── app.js
-├── models/
-│   ├── sentiment_model.json   # Serialized ML parameters
-│   └── model_card.json        # Evaluation logs & metadata
+│   └── app.js                 # Front-end heuristics, client advisor, and API integrations
+├── img/                       # Resized and compressed image assets
+│   ├── avatar.png / .jpg      # Concierge guide bot profile image
+│   ├── logo.png / .jpg        # Resort brand logo image
+│   └── ...                    # Package and gallery background snapshots
+├── models/                    
+│   ├── sentiment_model.json   # Serialized Naive Bayes ML model weights
+│   └── model_card.json        # Evaluation performance card and reproducibility metadata
+├── screenshots/               # Framed application feature walkthrough snapshots
 ├── tests/
-│   └── test_suite.py          # Backend Python unit tests
-├── greenhaven.db              # Relational SQLite datastore
-├── index.html                 # Booking portal homepage
-├── admin.html                 # Admin dashboard panel
-├── server.py                  # Full-stack HTTP API server
-├── train_model.py             # ML classifier trainer
-├── requirements.txt
-└── README.md
+│   └── test_suite.py          # Backend automated unit tests suite
+├── greenhaven.db              # SQLite relational datastore
+├── index.html                 # Main customer reservation landing portal
+├── admin.html                 # Moderation and administrative analytics dashboard
+├── server.py                  # Full-stack Python HTTP REST API server
+├── train_model.py             # ML classifier offline training script
+├── favicon.svg                # Emerald-and-gold "GK" brand favicon
+├── requirements.txt           # Cloud deployment dependency specification
+└── README.md                  # System documentation
 ```
 
 ---
