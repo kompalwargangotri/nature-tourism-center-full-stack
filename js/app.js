@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAuth();
   initWeather();
   initPayment();
+  initBookingLookup();
 });
 
 /* ==========================================================================
@@ -257,53 +258,69 @@ function initBookingSimulator() {
       addonTotal += 250 * (adultsCount + childrenCount);
     }
     
-    const subtotal = packageTotal + addonTotal;
-    
     // ==========================================================
-    // AI Dynamic Pricing Regressor Simulator
+    // Dynamic Pricing Rules Engine
     // ==========================================================
-    let dynamicFactor = 0.0;
+    let seasonalAdjustment = 0.0;
+    let weekendAdjustment = 0.0;
     let explanationParts = [];
     
     if (dateInput.value) {
-      const selectedDate = new Date(dateInput.value);
+      // Normalize selected date to avoid timezone shift errors
+      const dateParts = dateInput.value.split('-');
+      const selectedDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
       const month = selectedDate.getMonth(); // 0 = Jan, 5 = June
-      const day = selectedDate.getDay();     // 0 = Sun, 5 = Fri, 6 = Sat
+      const day = selectedDate.getDay();     // 0 = Sun, 1 = Mon, ..., 6 = Sat
+      const dayName = selectedDate.toLocaleDateString('en-US', { weekday: 'long' });
       
-      // Indian seasonality dynamic factors
-      if (month >= 5 && month <= 8) { // Monsoon season (June - Sept)
-        dynamicFactor -= 0.15;
-        explanationParts.push("Monsoon Off-Peak Discount (-15%)");
-      } else if (month === 10 || month === 11 || month === 0) { // Winter peak (Nov, Dec, Jan)
-        dynamicFactor += 0.12;
-        explanationParts.push("Winter Peak Demand surcharge (+12%)");
+      // Seasonality adjustments
+      if (month >= 5 && month <= 8) { // Monsoon (June - Sept)
+        seasonalAdjustment = -0.15;
+        explanationParts.push("A 15% monsoon discount was applied due to off-peak seasonal demand.");
+      } else if (month === 10 || month === 11 || month === 0) { // Winter (Nov, Dec, Jan)
+        seasonalAdjustment = 0.12;
+        explanationParts.push("A 12% winter peak surcharge was applied due to high seasonal demand.");
       } else {
-        explanationParts.push("Standard seasonal demand active");
+        explanationParts.push("Standard seasonal base rates applied.");
       }
       
-      // Weekend demand surge factor (Friday, Saturday, Sunday)
+      // Weekend adjustments (Friday, Saturday, Sunday)
       if (day === 0 || day === 5 || day === 6) {
-        dynamicFactor += 0.05;
-        explanationParts.push("Weekend surcharge (+5%)");
+        weekendAdjustment = 0.05;
+        explanationParts.push(`A 5% weekend surcharge was applied because the selected visit date is ${dayName}.`);
       }
     }
     
-    const finalSubtotal = subtotal * (1 + dynamicFactor);
-    const taxRate = 0.05;
-    const taxTotal = finalSubtotal * taxRate;
-    const grandTotal = finalSubtotal + taxTotal;
+    // Additive combination with clamp at ±20%
+    let combinedAdjustment = seasonalAdjustment + weekendAdjustment;
+    if (combinedAdjustment > 0.20) {
+      combinedAdjustment = 0.20;
+    } else if (combinedAdjustment < -0.20) {
+      combinedAdjustment = -0.20;
+    }
     
-    // Update pricing AI indicator UI
-    const adjustmentPct = Math.round(dynamicFactor * 100);
+    // Pricing calculation pipeline
+    const adjustedPackagePrice = packageTotal * (1 + combinedAdjustment);
+    const subtotal = adjustedPackagePrice + addonTotal;
+    
+    // Taxes & eco fee (5% of subtotal)
+    const taxRate = 0.05;
+    const taxTotal = subtotal * taxRate;
+    
+    // Grand Total (rounded to two decimal places at the final step only)
+    const grandTotal = Math.round((subtotal + taxTotal) * 100) / 100;
+    
+    // Update pricing indicator UI
+    const adjustmentPct = Math.round(combinedAdjustment * 100);
     const adjustmentSign = adjustmentPct >= 0 ? "+" : "";
     aiPricingAdjustment.textContent = `${adjustmentSign}${adjustmentPct}%`;
-    aiPricingExplanation.textContent = explanationParts.join(" + ");
+    aiPricingExplanation.textContent = explanationParts.join(" ");
     
     const mockConfidence = 93 + (dateInput.value ? (new Date(dateInput.value).getDate() % 5) : 2);
     aiPricingConfidence.textContent = `${mockConfidence}%`;
     
     // Update labels
-    summaryPackage.textContent = `₹${packageTotal.toLocaleString('en-IN', {maximumFractionDigits:2})}`;
+    summaryPackage.textContent = `₹${adjustedPackagePrice.toLocaleString('en-IN', {maximumFractionDigits:2})}`;
     summaryGuests.textContent = `${adultsCount} Adult${adultsCount > 1 ? 's' : ''}, ${childrenCount} Kid${childrenCount > 1 ? 's' : ''}`;
     summaryAddons.textContent = `₹${addonTotal.toLocaleString('en-IN', {maximumFractionDigits:2})}`;
     summaryTax.textContent = `₹${taxTotal.toLocaleString('en-IN', {maximumFractionDigits: 2})}`;
@@ -315,6 +332,7 @@ function initBookingSimulator() {
     return {
       packagePrice: packageCostPerGuest,
       packageTotal,
+      adjustedPackagePrice,
       adultsCount,
       childrenCount,
       addonTotal,
@@ -801,46 +819,59 @@ function initReviewsCarousel() {
   let activeRating = 5;
   let reviews = [];
   
-  // Real-time NLP Sentiment Lexicon scoring engine
-  const posWords = ['great', 'awesome', 'incredible', 'amazing', 'beautiful', 'clean', 'friendly', 'happy', 'love', 'loved', 'good', 'nice', 'perfect', 'stellar', 'helpful', 'luxury', 'cozy', 'enjoyed', 'excellent', 'heritage', 'traditional', 'delicious', 'organic', 'peaceful', 'wonderful'];
-  const negWords = ['bad', 'worst', 'poor', 'dirty', 'unfriendly', 'expensive', 'crowded', 'slow', 'waste', 'hate', 'terrible', 'horrible', 'annoying', 'broken', 'difficult', 'noisy', 'rude'];
+  // Backend NLP Sentiment Inference engine state
+  let activeSentimentLabel = 'Neutral';
+  let activeSentimentScore = 0.50;
+  let sentimentDebounceTimeout = null;
+  let currentSentimentRequestNum = 0;
 
-  function classifySentiment(text) {
-    if (!text || text.trim().length < 3) {
-      return { label: 'Neutral', score: 0.50 };
-    }
-    const words = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").split(/\s+/);
-    let posCount = 0;
-    let negCount = 0;
-    
-    words.forEach(w => {
-      if (posWords.includes(w)) posCount++;
-      if (negWords.includes(w)) negCount++;
-    });
-    
-    const totalCount = posCount + negCount;
-    if (totalCount === 0) {
-      return { label: 'Neutral', score: 0.50 };
-    }
-    
-    const score = 0.5 + ((posCount - negCount) / (totalCount * 2));
-    let label = 'Neutral';
-    if (score > 0.55) label = 'Positive';
-    if (score < 0.45) label = 'Negative';
-    
-    return { label, score: parseFloat(score.toFixed(2)) };
-  }
-
-  // Real-time input listener for NLP preview
+  // Real-time debounced input listener for NLP preview
   messageInput.addEventListener('input', () => {
-    const text = messageInput.value;
-    if (text.trim().length >= 5) {
-      const result = classifySentiment(text);
-      sentimentWrap.style.display = 'flex';
-      sentimentBadge.textContent = `${result.label} (${Math.round(result.score * 100)}%)`;
-      sentimentBadge.className = `sentiment-badge ${result.label.toLowerCase()}`;
+    const text = messageInput.value.trim();
+    
+    if (sentimentDebounceTimeout) {
+      clearTimeout(sentimentDebounceTimeout);
+    }
+    
+    if (text.length >= 5) {
+      sentimentDebounceTimeout = setTimeout(() => {
+        const thisRequestNum = ++currentSentimentRequestNum;
+        
+        fetch('/api/sentiment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        })
+        .then(res => {
+          if (!res.ok) throw new Error("Offline or validation error");
+          return res.json();
+        })
+        .then(result => {
+          if (thisRequestNum !== currentSentimentRequestNum) return;
+          
+          activeSentimentLabel = result.label;
+          activeSentimentScore = result.confidence;
+          
+          sentimentWrap.style.display = 'flex';
+          const pct = Math.round(result.confidence * 100);
+          sentimentBadge.textContent = `${result.label.toUpperCase()} (${pct}%)`;
+          sentimentBadge.className = `sentiment-badge ${result.label.toLowerCase()}`;
+        })
+        .catch(err => {
+          if (thisRequestNum !== currentSentimentRequestNum) return;
+          activeSentimentLabel = 'Neutral';
+          activeSentimentScore = 0.50;
+          
+          sentimentWrap.style.display = 'flex';
+          sentimentBadge.textContent = "Sentiment analysis temporarily unavailable";
+          sentimentBadge.className = "sentiment-badge neutral";
+          console.warn("Backend sentiment API query failed:", err);
+        });
+      }, 400); // 400ms debounce delay
     } else {
       sentimentWrap.style.display = 'none';
+      activeSentimentLabel = 'Neutral';
+      activeSentimentScore = 0.50;
     }
   });
   
@@ -902,7 +933,8 @@ function initReviewsCarousel() {
       return;
     }
     
-    const sentiment = classifySentiment(message);
+    const finalLabel = activeSentimentLabel || 'Neutral';
+    const finalScore = activeSentimentScore !== undefined ? activeSentimentScore : 0.50;
     
     submitBtn.disabled = true;
     submitBtn.textContent = 'Posting review...';
@@ -910,7 +942,7 @@ function initReviewsCarousel() {
     fetch('/api/reviews', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, rating: activeRating, text: message, sentiment_label: sentiment.label, sentiment_score: sentiment.score })
+      body: JSON.stringify({ name, rating: activeRating, text: message, sentiment_label: finalLabel, sentiment_score: finalScore })
     })
     .then(res => {
       if (!res.ok) throw new Error("Failed to submit review to SQL.");
@@ -929,6 +961,8 @@ function initReviewsCarousel() {
       renderReviews();
       
       showToast('Thank you! Review posted to SQL database.', 'success');
+      activeSentimentLabel = 'Neutral';
+      activeSentimentScore = 0.50;
     })
     .catch(err => {
       console.warn("Backend unavailable, saving review to LocalStorage Demo Mode:", err);
@@ -938,8 +972,8 @@ function initReviewsCarousel() {
         title: "Verified Visitor (Demo Mode)",
         rating: activeRating,
         text: message,
-        sentiment_label: sentiment.label,
-        sentiment_score: sentiment.score
+        sentiment_label: finalLabel,
+        sentiment_score: finalScore
       };
       
       const localReviews = JSON.parse(localStorage.getItem('greenhaven_reviews') || '[]');
@@ -1202,6 +1236,7 @@ function showToast(message, type = 'success') {
    11. AI Voice & Interactive Virtual Tour Guide Module
    ========================================================================== */
 function initVoiceGuide() {
+  window.chatbotSessionId = `session-${Date.now()}-${Math.floor(Math.random()*1000)}`;
   const trigger = document.getElementById('ai-guide-trigger');
   const card = document.getElementById('ai-guide-card');
   const cardClose = document.getElementById('ai-card-close');
@@ -1472,7 +1507,7 @@ function initVoiceGuide() {
 
       let reply = "";
       if (text.includes('hello') || text.includes('hi') || text.includes('hey')) {
-        reply = "Hello! I'm Aranya. How can I help you today? You can ask me about packages, booking simulator, food, or activities!";
+        reply = "Hello! I’m Aranya, your virtual resort concierge. I can help you explore packages, understand booking options, and navigate the retreat experience.";
       } else if (text.includes('package') || text.includes('rate') || text.includes('cost') || text.includes('price')) {
         reply = "We offer three packages: Nature Starter (₹650), Adventure Pro (₹1,200), and Luxury Agro Retreat (₹2,500). Scroll to our packages section to filter them!";
       } else if (text.includes('book') || text.includes('reserve') || text.includes('simulator') || text.includes('ticket')) {
@@ -1486,12 +1521,23 @@ function initVoiceGuide() {
       } else if (text.includes('sqlite') || text.includes('database') || text.includes('sql') || text.includes('backend')) {
         reply = "Our system runs a fullstack Python backend integrated with an SQLite database (greenhaven.db). It stores bookings, customer reviews, and helpdesk messages securely!";
       } else if (text.includes('logo') || text.includes('puerto') || text.includes('branding')) {
-        reply = "We have corrected the branding logo to the official 'GreenHaven Eco-Retreat' design. Est. 2023 - Sustainable Luxury.";
+        reply = "We have corrected the branding logo to the official 'GreenHaven Eco-Retreat' design representing sustainable luxury.";
       } else {
         reply = "I'm happy to help! You can ask about our packages, dynamic cost calculator, farm-fresh organic dining, or support contacts.";
       }
 
       addBotMessage(reply);
+      
+      // Telemetry background log
+      fetch('/api/chatbot/logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: window.chatbotSessionId || 'session-demo',
+          user_query: query,
+          bot_response: reply
+        })
+      }).catch(err => console.debug("Chatbot telemetry logging offline:", err));
     }, 1000);
   }
 
@@ -1951,5 +1997,341 @@ function initPayment() {
       }, 2300);
     });
   }
+}
+
+/* ==========================================================================
+   16. Booking Look-Up & Management Module
+   ========================================================================== */
+function initBookingLookup() {
+  const manageNavBtn = document.getElementById('manage-booking-nav-btn');
+  const lookupModal = document.getElementById('lookup-modal-overlay');
+  const lookupClose = document.getElementById('lookup-modal-close');
+  const searchForm = document.getElementById('lookup-search-form');
+  const ticketInput = document.getElementById('lookup-ticket-id');
+  
+  const resultDetails = document.getElementById('lookup-result-details');
+  const errorMsg = document.getElementById('lookup-error-msg');
+  
+  const resName = document.getElementById('lookup-result-name');
+  const resTicketId = document.getElementById('lookup-result-ticket-id');
+  const resPackage = document.getElementById('lookup-result-package');
+  const resDate = document.getElementById('lookup-result-date');
+  const resAdults = document.getElementById('lookup-result-adults');
+  const resChildren = document.getElementById('lookup-result-children');
+  const resAddons = document.getElementById('lookup-result-addons');
+  const resCost = document.getElementById('lookup-result-cost');
+  
+  const btnReprint = document.getElementById('btn-reprint-lookup');
+  const btnCancel = document.getElementById('btn-cancel-lookup');
+  
+  let activeBooking = null;
+  
+  if (manageNavBtn) {
+    manageNavBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      lookupModal.classList.add('active');
+      resultDetails.style.display = 'none';
+      errorMsg.style.display = 'none';
+      searchForm.reset();
+    });
+  }
+  
+  if (lookupClose) {
+    lookupClose.addEventListener('click', closeModal);
+  }
+  
+  lookupModal.addEventListener('click', (e) => {
+    if (e.target === lookupModal) closeModal();
+  });
+  
+  function closeModal() {
+    lookupModal.classList.remove('active');
+  }
+  
+  if (searchForm) {
+    searchForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const ticketId = ticketInput.value.trim().toUpperCase();
+      
+      if (!ticketId) return;
+      
+      fetch(`/api/bookings/${ticketId}`)
+      .then(res => {
+        if (!res.ok) throw new Error("Ticket not found.");
+        return res.json();
+      })
+      .then(data => {
+        activeBooking = data;
+        displayBooking(data);
+      })
+      .catch(err => {
+        console.warn("API ticket lookup failed, searching in LocalStorage fallback:", err);
+        const localBookings = JSON.parse(localStorage.getItem('greenhaven_bookings') || '[]');
+        const found = localBookings.find(b => b.ticket_id.toUpperCase() === ticketId);
+        
+        if (found) {
+          activeBooking = found;
+          displayBooking(found);
+        } else {
+          resultDetails.style.display = 'none';
+          errorMsg.style.display = 'block';
+        }
+      });
+    });
+  }
+  
+  function displayBooking(b) {
+    errorMsg.style.display = 'none';
+    resName.textContent = `${b.visitor_name}'s Entry Pass`;
+    resTicketId.textContent = `Ticket ID: ${b.ticket_id}`;
+    resPackage.textContent = b.package_name;
+    resDate.textContent = b.visit_date;
+    resAdults.textContent = `${b.adults} Guest(s)`;
+    resChildren.textContent = `${b.children} Kid(s)`;
+    resAddons.textContent = b.addons || "None";
+    resCost.textContent = `₹${parseFloat(b.total_price).toLocaleString('en-IN', {maximumFractionDigits:2})}`;
+    resultDetails.style.display = 'block';
+  }
+  
+  if (btnReprint) {
+    btnReprint.addEventListener('click', () => {
+      if (!activeBooking) return;
+      
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Print Pass - GreenHaven</title>
+            <style>
+              body { font-family: monospace; padding: 30px; text-align: left; line-height: 1.5; color: #333; }
+              .receipt-header { text-align: center; border-bottom: 2px dashed #ccc; padding-bottom: 15px; margin-bottom: 15px; }
+              .receipt-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+              .receipt-divider { border-top: 2px dashed #ccc; margin: 12px 0; }
+              .receipt-row.total { font-weight: bold; font-size: 16px; margin-top: 10px; }
+              .receipt-barcode { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px dashed #ccc; }
+              .barcode-sim { height: 45px; background: repeating-linear-gradient(90deg, #000, #000 2px, transparent 2px, transparent 6px, #000 6px, #000 10px, transparent 10px, transparent 12px); width: 70%; margin: 8px auto 0; }
+            </style>
+          </head>
+          <body onload="window.print();window.close();">
+            <div class="receipt-header">
+              <div class="receipt-logo">GREENHAVEN ECO-RETREAT</div>
+              <div>Booking Gate Pass Ticket</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Ticket ID: ${activeBooking.ticket_id}</div>
+            </div>
+            
+            <div class="receipt-row">
+              <span>Visitor Name:</span>
+              <strong>${activeBooking.visitor_name}</strong>
+            </div>
+            <div class="receipt-row">
+              <span>Email Address:</span>
+              <span>${activeBooking.email}</span>
+            </div>
+            <div class="receipt-row">
+              <span>Booking Date:</span>
+              <span>${activeBooking.visit_date}</span>
+            </div>
+            <div class="receipt-row">
+              <span>Package Choice:</span>
+              <span>${activeBooking.package_name}</span>
+            </div>
+            
+            <div class="receipt-divider"></div>
+            
+            <div class="receipt-row">
+              <span>Grand Total Cost:</span>
+              <span>₹${parseFloat(activeBooking.total_price).toLocaleString('en-IN', {maximumFractionDigits:2})}</span>
+            </div>
+            
+            <div class="receipt-barcode">
+              <div>SCANNABLE ENTRANCE TICKET</div>
+              <div class="barcode-sim"></div>
+              <div style="font-size: 0.7rem; margin-top: 5px;">Present this barcode at gate check-in</div>
+            </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    });
+  }
+  
+  if (btnCancel) {
+    btnCancel.addEventListener('click', () => {
+      if (!activeBooking) return;
+      
+      if (!confirm("Are you sure you want to cancel this booking and request a refund?")) return;
+      
+      const ticketId = activeBooking.ticket_id;
+      
+      fetch(`/api/bookings/${ticketId}`, {
+        method: 'DELETE'
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Server cancel error.");
+        return res.json();
+      })
+      .then(() => {
+        showToast(`Booking ${ticketId} canceled successfully.`, 'success');
+        closeModal();
+      })
+      .catch(err => {
+        console.warn("API cancel failed, running LocalStorage fallback:", err);
+        const localBookings = JSON.parse(localStorage.getItem('greenhaven_bookings') || '[]');
+        const updated = localBookings.filter(b => b.ticket_id.toUpperCase() !== ticketId.toUpperCase());
+        localStorage.setItem('greenhaven_bookings', JSON.stringify(updated));
+        
+        showToast(`Booking ${ticketId} canceled successfully (offline).`, 'success');
+        closeModal();
+      });
+    });
+  }
+
+  // ==========================================
+  // Explainable Weighted Package Advisor Module
+  // ==========================================
+  const advToggle = document.getElementById('advisor-header-toggle');
+  const advBody = document.getElementById('advisor-body-content');
+  const advArrow = document.querySelector('.advisor-arrow');
+  
+  const advInterest = document.getElementById('advisor-interest');
+  const advBudget = document.getElementById('advisor-budget');
+  const advSize = document.getElementById('advisor-size');
+  const advDuration = document.getElementById('advisor-duration');
+  
+  const advValidationMsg = document.getElementById('advisor-validation-msg');
+  const advRecDetails = document.getElementById('advisor-recommendation-details');
+  const advRecTitle = document.getElementById('advisor-rec-package-title');
+  const advRecExplanation = document.getElementById('advisor-rec-explanation');
+
+  if (advToggle) {
+    advToggle.style.cursor = 'pointer';
+    advToggle.addEventListener('click', () => {
+      if (advBody.style.display === 'none' || !advBody.style.display) {
+        advBody.style.display = 'flex';
+        advArrow.style.transform = 'rotate(180deg)';
+      } else {
+        advBody.style.display = 'none';
+        advArrow.style.transform = 'rotate(0deg)';
+      }
+    });
+  }
+
+  function evaluateAdvisor() {
+    const interest = advInterest.value;
+    const budgetVal = advBudget.value;
+    const size = advSize.value;
+    const duration = advDuration.value;
+    
+    // Incomplete preference form check
+    if (!interest || !budgetVal || !size || !duration) {
+      advValidationMsg.style.display = 'block';
+      advRecDetails.style.display = 'none';
+      return;
+    }
+    
+    advValidationMsg.style.display = 'none';
+    const limit = parseInt(budgetVal);
+    
+    // Packages parameters
+    const packages = [
+      { id: "650", name: "Nature Starter", basePrice: 650 },
+      { id: "1200", name: "Adventure Pro", basePrice: 1200 },
+      { id: "2500", name: "Luxury Agro Retreat", basePrice: 2500 }
+    ];
+    
+    let scores = [];
+    
+    packages.forEach(pkg => {
+      let score = 0;
+      let breakdown = { interest: 0, budget: 0, size: 0, duration: 0 };
+      
+      // 1. Interest Fit (40 points)
+      if (pkg.name === "Nature Starter" && interest === "camping") {
+        breakdown.interest = 40;
+      } else if (pkg.name === "Adventure Pro" && interest === "trekking") {
+        breakdown.interest = 40;
+      } else if (pkg.name === "Luxury Agro Retreat" && interest === "luxury") {
+        breakdown.interest = 40;
+      } else {
+        breakdown.interest = 10;
+      }
+      score += breakdown.interest;
+      
+      // 2. Budget Fit (30 points)
+      if (limit >= pkg.basePrice) {
+        breakdown.budget = 30;
+      } else {
+        breakdown.budget = 0;
+      }
+      score += breakdown.budget;
+      
+      // 3. Group Size Fit (15 points)
+      if (pkg.name === "Nature Starter") {
+        breakdown.size = (size === "1-2") ? 15 : (size === "3-4" ? 10 : 5);
+      } else if (pkg.name === "Adventure Pro") {
+        breakdown.size = (size === "3-4") ? 15 : (size === "1-2" ? 10 : 5);
+      } else if (pkg.name === "Luxury Agro Retreat") {
+        breakdown.size = (size === "5+") ? 15 : (size === "3-4" ? 10 : 5);
+      }
+      score += breakdown.size;
+      
+      // 4. Trip Duration Fit (15 points)
+      if (pkg.name === "Nature Starter") {
+        breakdown.duration = (duration === "1") ? 15 : (duration === "2" ? 10 : 5);
+      } else if (pkg.name === "Adventure Pro") {
+        breakdown.duration = (duration === "2") ? 15 : (duration === "3+" ? 10 : 5);
+      } else if (pkg.name === "Luxury Agro Retreat") {
+        breakdown.duration = (duration === "3+") ? 15 : (duration === "2" ? 10 : 5);
+      }
+      score += breakdown.duration;
+      
+      scores.push({
+        pkg: pkg,
+        score: score,
+        breakdown: breakdown,
+        withinBudget: (limit >= pkg.basePrice)
+      });
+    });
+    
+    // Sort based on points with tie-breakers:
+    // 1. Higher score first
+    // 2. Tie-break 1: Prefer package within budget (withinBudget is true)
+    // 3. Tie-break 2: Prefer lower-priced package (basePrice is smaller)
+    // 4. Tie-break 3: Fixed package order (Nature Starter, Adventure Pro, Luxury Agro Retreat)
+    scores.sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+      if (b.withinBudget !== a.withinBudget) {
+        return b.withinBudget ? -1 : 1; // True (withinBudget) should be sorted first (-1)
+      }
+      if (a.pkg.basePrice !== b.pkg.basePrice) {
+        return a.pkg.basePrice - b.pkg.basePrice; // Lower price first
+      }
+      const order = ["Nature Starter", "Adventure Pro", "Luxury Agro Retreat"];
+      return order.indexOf(a.pkg.name) - order.indexOf(b.pkg.name);
+    });
+    
+    const winner = scores[0];
+    
+    // Auto-select package in dropdown
+    const pkgSelect = document.getElementById('booking-package');
+    if (pkgSelect) {
+      pkgSelect.value = winner.pkg.basePrice;
+      pkgSelect.dispatchEvent(new Event('change'));
+    }
+    
+    // Render match percentage score out of 100
+    advRecTitle.textContent = `${winner.pkg.name} Recommended (${winner.score}/100 Match Score)`;
+    advRecExplanation.textContent = `${winner.pkg.name} matches your preferences because you selected ${advInterest.options[advInterest.selectedIndex].text} (${winner.breakdown.interest} pts), a ₹${limit.toLocaleString('en-IN')} budget limit (${winner.breakdown.budget} pts), group size of ${advSize.options[advSize.selectedIndex].text} (${winner.breakdown.size} pts), and duration of ${advDuration.options[advDuration.selectedIndex].text} (${winner.breakdown.duration} pts).`;
+    
+    advRecDetails.style.display = 'block';
+  }
+
+  [advInterest, advBudget, advSize, advDuration].forEach(select => {
+    if (select) {
+      select.addEventListener('change', evaluateAdvisor);
+    }
+  });
 }
 

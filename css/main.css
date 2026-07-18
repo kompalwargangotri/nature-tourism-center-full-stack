@@ -1463,6 +1463,41 @@ header {
   padding: 30px;
 }
 
+.modal-header-clean {
+  background: transparent;
+  padding: 0 0 12px 0;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header-clean h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.modal-header-clean .modal-close-btn {
+  position: static;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 0;
+  opacity: 0.8;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
+}
+
+.modal-header-clean .modal-close-btn:hover {
+  opacity: 1;
+  color: var(--primary);
+}
+
 /* Invoice details receipt style */
 .receipt {
   background-color: var(--bg-main);
@@ -2657,6 +2692,35 @@ footer {
 .reveal-delay-3 {
   transition-delay: 0.36s;
 }
+
+/* Academic Profile Card */
+.education-profile {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background-color: var(--bg-card-solid);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--secondary);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.education-profile h5 {
+  margin: 0 0 8px 0;
+  color: var(--primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.75px;
+}
+
+.education-profile p {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-main);
+}
+
 
 
 

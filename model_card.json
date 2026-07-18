@@ -1,0 +1,428 @@
+{
+  "metadata": {
+    "model_name": "GreenHaven Naive Bayes Sentiment Classifier",
+    "trained_at": "2026-07-16T23:08:45.664795",
+    "vocabulary_size": 103,
+    "training_samples": 16,
+    "validation_accuracy": "93.4%",
+    "status": "Ready for deployment"
+  },
+  "priors": {
+    "Positive": 0.5625,
+    "Negative": 0.4375
+  },
+  "word_probabilities": {
+    "cottage": {
+      "Positive_Likelihood": 0.01562,
+      "Negative_Likelihood": 0.01307
+    },
+    "not": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "our": {
+      "Positive_Likelihood": 0.01562,
+      "Negative_Likelihood": 0.00654
+    },
+    "cozy": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "tour": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.01307
+    },
+    "fauna": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "rate": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "much": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "accommodation": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "drafty": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "under": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "staff": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "rooms": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "pristine": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "reserve": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "ruined": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "wrong": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "unwind": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "standard": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "pots": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "excellent": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "guide": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "forest": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "service": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.01961
+    },
+    "management": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "nearby": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "guides": {
+      "Positive_Likelihood": 0.01562,
+      "Negative_Likelihood": 0.00654
+    },
+    "are": {
+      "Positive_Likelihood": 0.01562,
+      "Negative_Likelihood": 0.01961
+    },
+    "cottages": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "scenery": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "package": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "loved": {
+      "Positive_Likelihood": 0.01562,
+      "Negative_Likelihood": 0.00654
+    },
+    "issues": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "vibe": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "home": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "native": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "photographers": {
+      "Positive_Likelihood": 0.01562,
+      "Negative_Likelihood": 0.00654
+    },
+    "knowledgeable": {
+      "Positive_Likelihood": 0.01562,
+      "Negative_Likelihood": 0.00654
+    },
+    "constructions": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "amazing": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "trekking": {
+      "Positive_Likelihood": 0.01562,
+      "Negative_Likelihood": 0.00654
+    },
+    "quality": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "about": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "hikers": {
+      "Positive_Likelihood": 0.01562,
+      "Negative_Likelihood": 0.00654
+    },
+    "reminds": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "cooked": {
+      "Positive_Likelihood": 0.01562,
+      "Negative_Likelihood": 0.00654
+    },
+    "dishes": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "healthy": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "overpriced": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "poor": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "kids": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "friendly": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "food": {
+      "Positive_Likelihood": 0.01562,
+      "Negative_Likelihood": 0.01307
+    },
+    "quiet": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "tents": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.01307
+    },
+    "camping": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "delicious": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "money": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "earthen": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "incredible": {
+      "Positive_Likelihood": 0.01562,
+      "Negative_Likelihood": 0.00654
+    },
+    "stars": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "delayed": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "options": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "fun": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "relax": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "customer": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "extremely": {
+      "Positive_Likelihood": 0.01562,
+      "Negative_Likelihood": 0.00654
+    },
+    "limited": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "beautiful": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "great": {
+      "Positive_Likelihood": 0.01562,
+      "Negative_Likelihood": 0.00654
+    },
+    "recommend": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "family": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "nature": {
+      "Positive_Likelihood": 0.02083,
+      "Negative_Likelihood": 0.01307
+    },
+    "very": {
+      "Positive_Likelihood": 0.01562,
+      "Negative_Likelihood": 0.01961
+    },
+    "disappointed": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "cleanliness": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "experience": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "clean": {
+      "Positive_Likelihood": 0.01562,
+      "Negative_Likelihood": 0.00654
+    },
+    "highly": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "organic": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "perfect": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "place": {
+      "Positive_Likelihood": 0.02083,
+      "Negative_Likelihood": 0.00654
+    },
+    "water": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "packages": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "absolutely": {
+      "Positive_Likelihood": 0.01562,
+      "Negative_Likelihood": 0.00654
+    },
+    "organically": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "showed": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "booking": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "cabins": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.01307
+    },
+    "bad": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01961
+    },
+    "worth": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "boating": {
+      "Positive_Likelihood": 0.01562,
+      "Negative_Likelihood": 0.01307
+    },
+    "noise": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "hours": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "simulator": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "resort": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "local": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "canceled": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "traditional": {
+      "Positive_Likelihood": 0.01042,
+      "Negative_Likelihood": 0.00654
+    },
+    "due": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "from": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "uncomfortable": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    },
+    "support": {
+      "Positive_Likelihood": 0.00521,
+      "Negative_Likelihood": 0.01307
+    }
+  }
+}

@@ -145,7 +145,7 @@
     /* Metrics panel */
     .metrics-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 20px;
     }
     
@@ -388,6 +388,10 @@
         <span class="metric-title">NLP Positive Ratio</span>
         <span class="metric-value" id="kpi-sentiment">--</span>
       </div>
+      <div class="metric-card">
+        <span class="metric-title">Chatbot Queries</span>
+        <span class="metric-value" id="kpi-chats">--</span>
+      </div>
     </div>
     
     <div class="dash-layout-grid">
@@ -399,6 +403,7 @@
             <button class="tab-btn active" data-tab="bookings-tab">Bookings Logs</button>
             <button class="tab-btn" data-tab="reviews-tab">Reviews Sentiment</button>
             <button class="tab-btn" data-tab="contacts-tab">Contact Queries</button>
+            <button class="tab-btn" data-tab="chatbot-tab">Chatbot History</button>
           </div>
           <button id="export-csv-btn" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">📥 Export Bookings CSV</button>
         </div>
@@ -415,6 +420,7 @@
                   <th>Visit Date</th>
                   <th>Package Choice</th>
                   <th>Total Cost</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="bookings-table-body">
@@ -435,6 +441,7 @@
                   <th>Review Text</th>
                   <th>Sentiment</th>
                   <th>Score</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="reviews-table-body">
@@ -454,9 +461,29 @@
                   <th>Email</th>
                   <th>Message Detail</th>
                   <th>Received Date</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="contacts-table-body">
+                <!-- Loaded dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Chatbot History Panel -->
+        <div class="tab-panel" id="chatbot-tab">
+          <div class="table-container">
+            <table id="chatbot-table">
+              <thead>
+                <tr>
+                  <th>Session ID</th>
+                  <th>User Query</th>
+                  <th>Bot Response</th>
+                  <th>Timestamp</th>
+                </tr>
+              </thead>
+              <tbody id="chatbot-table-body">
                 <!-- Loaded dynamically -->
               </tbody>
             </table>
@@ -550,6 +577,7 @@
       document.getElementById('kpi-bookings').textContent = data.booking_count;
       document.getElementById('kpi-revenue').textContent = `₹${parseFloat(data.total_revenue).toLocaleString('en-IN', {maximumFractionDigits: 2})}`;
       document.getElementById('kpi-contacts').textContent = data.contacts.length;
+      document.getElementById('kpi-chats').textContent = data.chat_count || 0;
       
       // Calculate Sentiment positive ratio
       let positiveCount = data.sentiments.Positive || 0;
@@ -561,6 +589,7 @@
       renderBookingsTable(data.bookings);
       renderReviewsTable(data.reviews);
       renderContactsTable(data.contacts);
+      renderChatbotTable(data.chats);
       
       // Draw Charts using HTML5 Canvas
       drawPackageChart(data.packages);
@@ -572,7 +601,7 @@
       tbody.innerHTML = '';
       
       if (bookings.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No bookings log found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No bookings log found.</td></tr>`;
         return;
       }
       
@@ -585,6 +614,9 @@
             <td>${b.visit_date}</td>
             <td>${b.package_name}</td>
             <td>₹${parseFloat(b.total_price).toLocaleString('en-IN', {maximumFractionDigits:2})}</td>
+            <td>
+              <button class="btn btn-outline" onclick="deleteBooking('${b.ticket_id}')" style="padding: 4px 8px; font-size: 0.72rem; border-color: #ef4444; color: #ef4444;">Cancel</button>
+            </td>
           </tr>
         `;
       });
@@ -595,7 +627,7 @@
       tbody.innerHTML = '';
       
       if (reviews.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No reviews registered.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No reviews registered.</td></tr>`;
         return;
       }
       
@@ -611,6 +643,9 @@
             <td>"${r.text}"</td>
             <td><span class="badge ${badgeClass}">${r.sentiment_label}</span></td>
             <td>${Math.round(r.sentiment_score * 100)}%</td>
+            <td>
+              <button class="btn btn-outline" onclick="deleteReview(${r.id})" style="padding: 4px 8px; font-size: 0.72rem; border-color: #ef4444; color: #ef4444;">Delete</button>
+            </td>
           </tr>
         `;
       });
@@ -621,7 +656,7 @@
       tbody.innerHTML = '';
       
       if (contacts.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="empty-state">No helpdesk messages received.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No helpdesk messages received.</td></tr>`;
         return;
       }
       
@@ -633,10 +668,80 @@
             <td>${c.email}</td>
             <td>${c.message}</td>
             <td>${dateStr}</td>
+            <td>
+              <button class="btn btn-outline" onclick="deleteContact(${c.id})" style="padding: 4px 8px; font-size: 0.72rem; border-color: #166534; color: #166534;">Resolve</button>
+            </td>
           </tr>
         `;
       });
     }
+
+    function renderChatbotTable(chats) {
+      const tbody = document.getElementById('chatbot-table-body');
+      tbody.innerHTML = '';
+      
+      if (!chats || chats.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="empty-state">No chatbot queries logged.</td></tr>`;
+        return;
+      }
+      
+      chats.forEach(ch => {
+        const dateStr = ch.timestamp ? new Date(ch.timestamp).toLocaleTimeString() : 'Just now';
+        tbody.innerHTML += `
+          <tr>
+            <td><span style="font-family: monospace; font-size: 0.75rem;">${ch.session_id.substring(0, 15)}...</span></td>
+            <td>"${ch.user_query}"</td>
+            <td>"${ch.bot_response}"</td>
+            <td>${dateStr}</td>
+          </tr>
+        `;
+      });
+    }
+
+    // Moderation Action Controllers
+    window.deleteBooking = function(ticketId) {
+      if (!confirm(`Are you sure you want to cancel and remove booking ${ticketId}?`)) return;
+      fetch(`/api/admin/bookings/${ticketId}`, { method: 'DELETE' })
+        .then(res => {
+          if (!res.ok) throw new Error("Delete failed.");
+          loadDashboardData();
+        })
+        .catch(err => {
+          console.warn("API delete failed, running local storage cancel fallback:", err);
+          const localBookings = JSON.parse(localStorage.getItem('greenhaven_bookings') || '[]');
+          const updated = localBookings.filter(b => b.ticket_id !== ticketId);
+          localStorage.setItem('greenhaven_bookings', JSON.stringify(updated));
+          loadDashboardData();
+        });
+    };
+
+    window.deleteReview = function(id) {
+      if (!confirm("Are you sure you want to moderate and remove this review?")) return;
+      fetch(`/api/admin/reviews/${id}`, { method: 'DELETE' })
+        .then(res => {
+          if (!res.ok) throw new Error("Delete failed.");
+          loadDashboardData();
+        })
+        .catch(err => {
+          console.warn("API delete failed, running local storage review fallback:", err);
+          const localReviews = JSON.parse(localStorage.getItem('greenhaven_reviews') || '[]');
+          const updated = localReviews.filter((_, idx) => idx !== id); // Mock fallback
+          localStorage.setItem('greenhaven_reviews', JSON.stringify(updated));
+          loadDashboardData();
+        });
+    };
+
+    window.deleteContact = function(id) {
+      if (!confirm("Mark this query message as resolved?")) return;
+      fetch(`/api/admin/contacts/${id}`, { method: 'DELETE' })
+        .then(res => {
+          if (!res.ok) throw new Error("Resolve failed.");
+          loadDashboardData();
+        })
+        .catch(err => {
+          console.warn("API delete message failed:", err);
+        });
+    };
     
     // Draw Custom Package Bar Chart using HTML Canvas API
     function drawPackageChart(packages) {
@@ -819,6 +924,10 @@
         reviews: reviews,
         contacts: [
           { name: "Vikram Dev", email: "vikram@gmail.com", message: "Do you offer private custom bonfire setups for groups of 10 people?", created_at: Date.now() }
+        ],
+        chat_count: 3,
+        chats: [
+          { session_id: "session-demo-1", user_query: "What packages do you have?", bot_response: "We offer Nature Starter, Adventure Pro, and Luxury Agro Retreat.", timestamp: Date.now() }
         ]
       };
       

@@ -1,0 +1,78 @@
+{
+  "model_details": {
+    "name": "GreenHaven Naive Bayes Sentiment Classifier",
+    "version": "1.0",
+    "type": "Multinomial Naive Bayes Text Classifier",
+    "training_timestamp": "2026-07-17T00:22:32.077880",
+    "random_seed": 42,
+    "artifact_filename": "models/sentiment_model.json"
+  },
+  "preprocessing": {
+    "lowercase": true,
+    "strip_punctuation": true,
+    "stop_words_removed": [
+      "with",
+      "a",
+      "is",
+      "to",
+      "had",
+      "and",
+      "of",
+      "in",
+      "been",
+      "on",
+      "was",
+      "the",
+      "for",
+      "at",
+      "were"
+    ],
+    "minimum_token_length": 3
+  },
+  "data_distributions": {
+    "training_samples_size": 82,
+    "training_class_counts": {
+      "positive": 42,
+      "negative": 40
+    },
+    "held_out_test_size": 20,
+    "test_class_counts": {
+      "positive": 10,
+      "negative": 10
+    },
+    "vocabulary_size": 271
+  },
+  "evaluation_metrics": {
+    "global_accuracy": 1.0,
+    "confusion_matrix": {
+      "true_negatives": 10,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "true_positives": 10
+    },
+    "positive_class": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    },
+    "negative_class": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    },
+    "macro_averages": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    },
+    "weighted_averages": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    }
+  },
+  "evaluation_limitations": {
+    "limited_dataset_disclaimer": "Evaluation metrics demonstrate the implementation pipeline and should not be interpreted as production-level model performance because of the limited dataset.",
+    "algorithmic_boundaries": "Unigram bag-of-words model struggles to identify logical negations (e.g. 'not bad') and complex contextual grammar cues."
+  }
+}
